@@ -274,8 +274,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 layer_state_t layer_state_set_user(layer_state_t state)
 {
-  // レイヤーが1または3の場合、スクロールモードが有効になる
+  // レイヤーが3の場合、スクロールモードが有効になる
   keyball_set_scroll_mode(get_highest_layer(state) == 3);
+  // レイヤーが1または3の場合、スクロールモードが有効になる
   // keyball_set_scroll_mode(get_highest_layer(state) == 1 || get_highest_layer(state) == 3);
 
   // レイヤーとLEDを連動させる
@@ -297,18 +298,19 @@ layer_state_t layer_state_set_user(layer_state_t state)
 
 #include "lib/oledkit/oledkit.h"
 
+// OLED表示のカスタマイズ
 void oledkit_render_info_user(void)
 {
+    // デフォルトの情報表示
     //   keyball_oled_render_keyinfo();
     //   keyball_oled_render_ballinfo();
     //   oled_write_P(PSTR("Layer:"), false);
     //   oled_write(get_u8_str(get_highest_layer(layer_state), ' '), false);
 
+    // カスタム情報表示
     keyball_oled_render_keyinfo_t2();
     keyball_oled_render_ballinfo_t2();
     keyball_oled_render_cat();
-    // keyball_oled_render_ballinfo();
-    // keyball_oled_render_layerinfo();
 }
 
 // void oledkit_render_info_user(void) {

@@ -272,6 +272,14 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 };
 // clang-format on
 
+// マウス操作用レイヤーが点灯中だけ RGB を別色にするための状態保持
+static bool mouse_rgb_override_active = false;
+static bool saved_rgblight_enabled = false;
+static uint8_t saved_rgblight_mode = RGBLIGHT_MODE_STATIC_LIGHT;
+static uint16_t saved_rgblight_hue = 0;
+static uint8_t saved_rgblight_sat = 0;
+static uint8_t saved_rgblight_val = 0;
+
 layer_state_t layer_state_set_user(layer_state_t state)
 {
   // レイヤーが3の場合、スクロールモードが有効になる
@@ -279,16 +287,41 @@ layer_state_t layer_state_set_user(layer_state_t state)
   // レイヤーが1または3の場合、スクロールモードが有効になる
   // keyball_set_scroll_mode(get_highest_layer(state) == 1 || get_highest_layer(state) == 3);
 
-  // レイヤーとLEDを連動させる
-  uint8_t layer = biton32(state);
-  switch (layer)
+  bool mouse_layer_active = layer_state_cmp(state, click_layer);
+  if (mouse_layer_active && !mouse_rgb_override_active)
   {
-  case 4:
-    rgblight_sethsv(HSV_WHITE);
-    break;
+    // 通常時のアニメーション設定を退避し、マウス層のみ白単色へ切り替え
+    mouse_rgb_override_active = true;
+    saved_rgblight_enabled = rgblight_is_enabled();
+    saved_rgblight_mode = rgblight_get_mode();
+    saved_rgblight_hue = rgblight_get_hue();
+    saved_rgblight_sat = rgblight_get_sat();
+    saved_rgblight_val = rgblight_get_val();
 
-  default:
-    rgblight_sethsv(HSV_OFF);
+    if (!saved_rgblight_enabled)
+    {
+      rgblight_enable_noeeprom();
+    }
+
+    // LED発光モードの変更
+    rgblight_mode_noeeprom(RGBLIGHT_MODE_STATIC_LIGHT);
+    // 色相、彩度、明度の設定
+    rgblight_sethsv_noeeprom(HSV_WHITE);
+  }
+  else if (!mouse_layer_active && mouse_rgb_override_active)
+  {
+    // クリック層が外れたら退避した状態へ復元
+    mouse_rgb_override_active = false;
+
+    if (!saved_rgblight_enabled)
+    {
+      rgblight_disable_noeeprom();
+    }
+    else
+    {
+      rgblight_mode_noeeprom(saved_rgblight_mode);
+      rgblight_sethsv_noeeprom(saved_rgblight_hue, saved_rgblight_sat, saved_rgblight_val);
+    }
   }
 
   return state;

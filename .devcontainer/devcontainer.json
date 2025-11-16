@@ -1,0 +1,27 @@
+{
+  "name": "Keyball QMK Dev",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": "..",
+    "args": {
+      "QMK_VERSION": "0.22.14"
+    }
+  },
+  "workspaceFolder": "/workspaces/keyball-custom",
+  "postCreateCommand": "bash .devcontainer/scripts/setup-qmk.sh",
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "terminal.integrated.shell.linux": "/bin/bash",
+        "editor.formatOnSave": true,
+        "files.trimTrailingWhitespace": true
+      },
+      "extensions": [
+        "ms-vscode.cpptools",
+        "ms-python.python",
+        "ms-vscode.makefile-tools",
+        "eamodio.gitlens"
+      ]
+    }
+  }
+}

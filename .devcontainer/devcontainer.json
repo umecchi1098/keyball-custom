@@ -37,7 +37,12 @@
         }
     },
     // デフォルトのワークスペースマウントを明示的に指定
-    "workspaceMount": "source=${localWorkspaceFolder},target=/workspaces/keyball-custom,type=bind,consistency=cached",
     "workspaceFolder": "/workspaces/keyball-custom",
+    "workspaceMount": "source=${localWorkspaceFolder},target=/workspaces/keyball-custom,type=bind,consistency=cached",
+    "mounts": [
+        // Codex 設定・認証キャッシュ（root と workspace 両方にマウント）
+        "source=${localEnv:HOME}/.codex,target=/root/.codex,type=bind,consistency=cached",
+        "source=${localEnv:HOME}/.codex,target=/sanwa-sf-devops-main/.codex,type=bind,consistency=cached"
+    ],
     "postCreateCommand": "bash .devcontainer/scripts/setup-qmk.sh"
 }

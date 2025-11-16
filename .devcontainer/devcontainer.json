@@ -1,27 +1,43 @@
 {
-  "name": "Keyball QMK Dev",
-  "build": {
-    "dockerfile": "Dockerfile",
-    "context": "..",
-    "args": {
-      "QMK_VERSION": "0.22.14"
-    }
-  },
-  "workspaceFolder": "/workspaces/keyball-custom",
-  "postCreateCommand": "bash .devcontainer/scripts/setup-qmk.sh",
-  "customizations": {
-    "vscode": {
-      "settings": {
-        "terminal.integrated.shell.linux": "/bin/bash",
-        "editor.formatOnSave": true,
-        "files.trimTrailingWhitespace": true
-      },
-      "extensions": [
-        "ms-vscode.cpptools",
-        "ms-python.python",
-        "ms-vscode.makefile-tools",
-        "eamodio.gitlens"
-      ]
-    }
-  }
+    "name": "Keyball QMK Dev",
+    "build": {
+        "dockerfile": "Dockerfile",
+        "context": "..",
+        "args": {
+            "QMK_VERSION": "0.22.14"
+        }
+    },
+    "customizations": {
+        "vscode": {
+            "settings": {
+                "terminal.integrated.shell.linux": "/bin/bash",
+                "editor.formatOnSave": true,
+                "files.trimTrailingWhitespace": true,
+                // Linuxコンテナ内でのデフォルトターミナルをzshに設定
+                "terminal.integrated.defaultProfile.linux": "zsh"
+            },
+            "extensions": [
+                "ms-vscode.cpptools",
+                "ms-python.python",
+                "ms-vscode.makefile-tools",
+                "eamodio.gitlens",
+                "openai.chatgpt",
+                "moshfeu.compare-folders",
+                "ms-azuretools.vscode-docker",
+                "mhutchie.git-graph",
+                "donjayamanne.githistory",
+                "github.vscode-github-actions",
+                "GitHub.copilot",
+                "GitHub.copilot-chat",
+                "oderwat.indent-rainbow",
+                "yzhang.markdown-all-in-one",
+                "DavidAnson.vscode-markdownlint",
+                "christian-kohler.path-intellisense"
+            ]
+        }
+    },
+    // デフォルトのワークスペースマウントを明示的に指定
+    "workspaceMount": "source=${localWorkspaceFolder},target=/workspaces/keyball-custom,type=bind,consistency=cached",
+    "workspaceFolder": "/workspaces/keyball-custom",
+    "postCreateCommand": "bash .devcontainer/scripts/setup-qmk.sh"
 }

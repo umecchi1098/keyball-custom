@@ -21,11 +21,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 // 容量削減のため以下をオミット
-// * The firmware is too large! 28814/28672 (142 bytes over)
+// 1定義につき100byte程度削減される
+// TWINKLE: 1100bye程度ある。メチャクチャ容量食うので注意
 #ifdef RGBLIGHT_ENABLE
 // #define RGBLIGHT_EFFECT_BREATHING
-#define RGBLIGHT_EFFECT_RAINBOW_MOOD
-#define RGBLIGHT_EFFECT_RAINBOW_SWIRL
+// #define RGBLIGHT_EFFECT_RAINBOW_MOOD
+// #define RGBLIGHT_EFFECT_RAINBOW_SWIRL
 // #define RGBLIGHT_EFFECT_SNAKE
 // #define RGBLIGHT_EFFECT_KNIGHT
 // #define RGBLIGHT_EFFECT_CHRISTMAS

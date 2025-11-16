@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include QMK_KEYBOARD_H
 #include "quantum.h"
+#include "eeconfig.h"
 
 // コード表
 // 【KBC_RST: 0x5DA5】Keyball 設定のリセット
@@ -67,6 +68,23 @@ int16_t mouse_move_count_ratio = 5;  // ポインターの動きを再生する�
 
 int16_t mouse_movement;
 
+typedef union
+{
+  uint32_t raw;
+  struct
+  {
+    bool mouse_rgb_enabled : 1;
+  };
+} keyball_user_config_t;
+
+// RGB トグル状態を EEPROM に永続化するための作業用キャッシュ
+static keyball_user_config_t keyball_user_config = {
+    .raw = 0,
+    .mouse_rgb_enabled = true,
+};
+
+static void update_mouse_rgb_overlay(layer_state_t state);
+
 // クリック用のレイヤーを有効にする。　Enable layers for clicks
 void enable_click_layer(void)
 {
@@ -115,6 +133,16 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record)
 
   switch (keycode)
   {
+  case KBC_MOUSE_RGB_TOG:
+    if (record->event.pressed)
+    {
+      // 物理キーからオーバーレイの有効/無効を切り替え、即座に EEPROM へ保存
+      keyball_user_config.mouse_rgb_enabled = !keyball_user_config.mouse_rgb_enabled;
+      eeconfig_update_user(keyball_user_config.raw);
+      update_mouse_rgb_overlay(layer_state);
+    }
+    return false;
+
   case KC_MY_BTN1:
   case KC_MY_BTN2:
   case KC_MY_BTN3:
@@ -260,15 +288,15 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     RGB_RMOD , RGB_HUD  , RGB_SAD  , RGB_VAD  , _______  , _______  ,                                  CPI_D1K  , CPI_D100 , CPI_I100 , CPI_I1K  , KBC_SAVE , KBC_RST  ,
     _______  , _______  , SCRL_DVD , SCRL_DVI , SCRL_MO  , SCRL_TO  , EE_CLR   ,            EE_CLR   , KC_HOME  , KC_PGDN  , KC_PGUP  , KC_END   , _______  , _______  ,
     QK_BOOT  , _______  , KC_LEFT  , KC_DOWN  , KC_UP    , KC_RGHT  , _______  ,            _______  , KC_BSPC  , _______  , _______  , _______  , _______  , QK_BOOT
-  ),
-
-  [4] = LAYOUT_universal(
-    _______  , _______  , _______  , _______  , _______  , _______  ,                                  _______  , _______  , _______  , _______  , _______  , _______  ,
-    _______  , _______  , _______  , _______  , _______  , _______  ,                                  _______  , _______  , _______  , _______  , _______  , _______  ,
-    _______  , _______  , _______  , _______  , _______  , _______  ,                                  _______  ,KC_MY_BTN1, _______  ,KC_MY_BTN2, _______  , _______  ,
-    _______  , _______  , _______  , _______  , _______  , _______  , _______  ,            _______  , _______  , _______  , _______  , _______  , _______  , _______  ,
-    _______  , _______  , _______  , _______  , _______  , _______  , _______  ,            _______  , _______  , _______  , _______  , _______  , _______  , _______
   )
+
+//   [4] = LAYOUT_universal(
+//     _______  , _______  , _______  , _______  , _______  , _______  ,                                  _______  , _______  , _______  , _______  , _______  , _______  ,
+//     _______  , _______  , _______  , _______  , _______  , _______  ,                                  _______  , _______  , _______  , _______  , _______  , _______  ,
+//     _______  , _______  , _______  , _______  , _______  , _______  ,                                  _______  ,KC_MY_BTN1, _______  ,KC_MY_BTN2, _______  , _______  ,
+//     _______  , _______  , _______  , _______  , _______  , _______  , _______  ,            _______  , _______  , _______  , _______  , _______  , _______  , _______  ,
+//     _______  , _______  , _______  , _______  , _______  , _______  , _______  ,            _______  , _______  , _______  , _______  , _______  , _______  , _______
+//   )
 };
 // clang-format on
 
@@ -280,6 +308,66 @@ static uint16_t saved_rgblight_hue = 0;
 static uint8_t saved_rgblight_sat = 0;
 static uint8_t saved_rgblight_val = 0;
 
+static void enable_mouse_rgb_overlay(void)
+{
+  if (mouse_rgb_override_active)
+  {
+    return;
+  }
+
+  // 既存アニメーションへ戻せるよう現在の RGB 設定を一式退避しておく
+  mouse_rgb_override_active = true;
+  saved_rgblight_enabled = rgblight_is_enabled();
+  saved_rgblight_mode = rgblight_get_mode();
+  saved_rgblight_hue = rgblight_get_hue();
+  saved_rgblight_sat = rgblight_get_sat();
+  saved_rgblight_val = rgblight_get_val();
+
+  if (!saved_rgblight_enabled)
+  {
+    rgblight_enable_noeeprom();
+  }
+
+  // LED発光モードの変更
+  rgblight_mode_noeeprom(RGBLIGHT_MODE_STATIC_LIGHT);
+  // 色相、彩度、明度の設定
+  rgblight_sethsv_noeeprom(HSV_WHITE);
+}
+
+static void disable_mouse_rgb_overlay(void)
+{
+  if (!mouse_rgb_override_active)
+  {
+    return;
+  }
+
+  mouse_rgb_override_active = false;
+
+  if (!saved_rgblight_enabled)
+  {
+    rgblight_disable_noeeprom();
+  }
+  else
+  {
+    // 待避していたモード/HSV をそのまま復元する
+    rgblight_mode_noeeprom(saved_rgblight_mode);
+    rgblight_sethsv_noeeprom(saved_rgblight_hue, saved_rgblight_sat, saved_rgblight_val);
+  }
+}
+
+static void update_mouse_rgb_overlay(layer_state_t state)
+{
+  // クリックレイヤー有効かつトグル ON のときのみ上書き色を適用
+  if (keyball_user_config.mouse_rgb_enabled && layer_state_cmp(state, click_layer))
+  {
+    enable_mouse_rgb_overlay();
+  }
+  else
+  {
+    disable_mouse_rgb_overlay();
+  }
+}
+
 layer_state_t layer_state_set_user(layer_state_t state)
 {
   // レイヤーが3の場合、スクロールモードが有効になる
@@ -287,44 +375,30 @@ layer_state_t layer_state_set_user(layer_state_t state)
   // レイヤーが1または3の場合、スクロールモードが有効になる
   // keyball_set_scroll_mode(get_highest_layer(state) == 1 || get_highest_layer(state) == 3);
 
-  bool mouse_layer_active = layer_state_cmp(state, click_layer);
-  if (mouse_layer_active && !mouse_rgb_override_active)
-  {
-    // 通常時のアニメーション設定を退避し、マウス層のみ白単色へ切り替え
-    mouse_rgb_override_active = true;
-    saved_rgblight_enabled = rgblight_is_enabled();
-    saved_rgblight_mode = rgblight_get_mode();
-    saved_rgblight_hue = rgblight_get_hue();
-    saved_rgblight_sat = rgblight_get_sat();
-    saved_rgblight_val = rgblight_get_val();
-
-    if (!saved_rgblight_enabled)
-    {
-      rgblight_enable_noeeprom();
-    }
-
-    // LED発光モードの変更
-    rgblight_mode_noeeprom(RGBLIGHT_MODE_STATIC_LIGHT);
-    // 色相、彩度、明度の設定
-    rgblight_sethsv_noeeprom(HSV_WHITE);
-  }
-  else if (!mouse_layer_active && mouse_rgb_override_active)
-  {
-    // クリック層が外れたら退避した状態へ復元
-    mouse_rgb_override_active = false;
-
-    if (!saved_rgblight_enabled)
-    {
-      rgblight_disable_noeeprom();
-    }
-    else
-    {
-      rgblight_mode_noeeprom(saved_rgblight_mode);
-      rgblight_sethsv_noeeprom(saved_rgblight_hue, saved_rgblight_sat, saved_rgblight_val);
-    }
-  }
+  update_mouse_rgb_overlay(state);
 
   return state;
+}
+
+void keyboard_post_init_user(void)
+{
+  // 電源投入時にユーザー設定を読み取り、未初期化ならデフォルト値で EECONFIG を整える
+  keyball_user_config.raw = eeconfig_read_user();
+  if (keyball_user_config.raw == 0xFFFFFFFF)
+  {
+    eeconfig_init_user();
+    keyball_user_config.raw = eeconfig_read_user();
+  }
+
+  update_mouse_rgb_overlay(layer_state);
+}
+
+void eeconfig_init_user(void)
+{
+  // EEPROM 初期化時はトグルを ON に戻して保存しておく
+  keyball_user_config.raw = 0;
+  keyball_user_config.mouse_rgb_enabled = true;
+  eeconfig_update_user(keyball_user_config.raw);
 }
 
 #ifdef OLED_ENABLE

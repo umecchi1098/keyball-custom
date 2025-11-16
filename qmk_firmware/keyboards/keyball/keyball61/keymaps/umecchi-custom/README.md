@@ -53,6 +53,7 @@ https://user-images.githubusercontent.com/34639637/219548230-d1c8ee17-b649-48c8-
 | `SCRL_MO`  | `0x5DAC`         | キーを押している間、スクロールモードになります                   |
 | `SCRL_DVI` | `0x5DAD`         | スクロール除数を１つ上げます(max D7 = 1/128)← 最もスクロール遅い |
 | `SCRL_DVD` | `0x5DAE`         | スクロール除数を１つ下げます(min D0 = 1/1)← 最もスクロール速い   |
+| `KBC_MOUSE_RGB_TOG` | `Kb 16` | 自動マウスレイヤー中の RGB オーバーレイをトグルします            |
 
 ## 配布版ファームウェアも用意しました
 

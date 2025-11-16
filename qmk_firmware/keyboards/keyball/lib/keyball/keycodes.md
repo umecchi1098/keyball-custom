@@ -3,7 +3,9 @@
 * [English/英語](#english)
 * [日本語/Japanese](#japanese)
 
+<!-- markdownlint-disable-next-line MD033 -->
 <a id="english"></a>
+
 ## Special Keycodes
 
 | Keycode    | Value on Remap  | Hex      | Description                                                       |
@@ -24,10 +26,13 @@
 | `SSNP_VRT` | `Kb 13`         | `0x7e0d` | Set scroll snap mode as vertical                                  |
 | `SSNP_HOR` | `Kb 14`         | `0x7e0e` | Set scroll snap mode as horizontal                                |
 | `SSNP_FRE` | `Kb 15`         | `0x7e0f` | Set scroll snap mode as disable (free scroll)                     |
+| `KBC_MOUSE_RGB_TOG` | `Kb 16` | `0x7e10` | Toggle mouse-layer RGB overlay                                     |
 
 [^1]: CPI, scroll divider, automatic mouse layer's enable/disable, and automatic mouse layer's timeout.
 
+<!-- markdownlint-disable-next-line MD033 -->
 <a id="japanese"></a>
+
 ## 特殊キーコード
 
 | キーコード | Remap上での表記 | 値       | 説明                                                              |
@@ -48,5 +53,6 @@
 | `SSNP_VRT` | `Kb 13`         | `0x7e0d` | スクロールスナップモードを垂直にする                              |
 | `SSNP_HOR` | `Kb 14`         | `0x7e0e` | スクロールスナップモードを水平にする                              |
 | `SSNP_FRE` | `Kb 15`         | `0x7e0f` | スクロールスナップモードを無効にする(自由スクロール)              |
+| `KBC_MOUSE_RGB_TOG` | `Kb 16` | `0x7e10` | マウスレイヤー時の RGB オーバーレイをトグルする                   |
 
 [^2]: CPI、スクロール除数、自動マウスレイヤーのON/OFF状態、及び自動マウスレイヤのタイムアウト

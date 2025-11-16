@@ -115,6 +115,9 @@ enum keyball_keycodes {
     AML_I50  = QK_KB_11, // Increment automatic mouse layer timeout
     AML_D50  = QK_KB_12, // Decrement automatic mouse layer timeout
 
+    // 追加したキーコード
+    KBC_MOUSE_RGB_TOG = QK_KB_16, // Toggle mouse-layer RGB overlay
+
     // User customizable 32 keycodes.
     KEYBALL_SAFE_RANGE = QK_USER_0,
 };

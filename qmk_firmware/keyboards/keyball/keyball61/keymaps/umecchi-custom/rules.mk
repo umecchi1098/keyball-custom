@@ -3,3 +3,8 @@ RGBLIGHT_ENABLE = yes
 OLED_ENABLE = yes
 
 VIA_ENABLE = yes
+
+# 削減
+LTO_ENABLE = yes
+
+MUSIC_ENABLE = no

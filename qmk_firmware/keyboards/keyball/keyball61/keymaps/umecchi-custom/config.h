@@ -21,7 +21,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 // 容量削減のため以下をオミット
-// 1定義につき100byte程度削減される
 // TWINKLE: 1100bye程度ある。メチャクチャ容量食うので注意
 #ifdef RGBLIGHT_ENABLE
 // #define RGBLIGHT_EFFECT_BREATHING
@@ -37,7 +36,17 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 
 #define TAP_CODE_DELAY 5
-#define DYNAMIC_KEYMAP_LAYER_COUNT 5
+// キーマップのレイヤー数
+#define DYNAMIC_KEYMAP_LAYER_COUNT 4
 
+// 自動マウスレイヤー機能
+#define POINTING_DEVICE_AUTO_MOUSE_ENABLE
+#define AUTO_MOUSE_DEFAULT_LAYER 2
+#define AUTO_MOUSE_TIME 500
+
+// 光学センサー
 #define KEYBALL_CPI_DEFAULT 700      // 光学センサーPMW3360DM の解像度 (CPI) の規定値
 #define KEYBALL_SCROLL_DIV_DEFAULT 4 // スクロール速度の規定値
+
+// 節約
+#define NO_MUSIC_MODE
